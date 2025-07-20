@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gatewise_app/modules/authenticate/presentation/auth_flow_notifier.dart';
 import '../../../core/auth/auth_notifier.dart';
 import '../../../core/auth/auth_state.dart';
 
@@ -11,18 +12,33 @@ class AuthLoginScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
-    final notifier = ref.read(authProvider.notifier);
+    final loginState = ref.watch(authFlowNotifierProvider);
+    final loginNotifier = ref.read(authFlowNotifierProvider.notifier);
 
     ref.listen<AuthState>(authProvider, (previous, next) {
       if (next is AuthAuthenticated) {
-        log("Authentication was successful");
-        // TODO: Navigate to the home screen
+        log("User authenticated.");
       } else if (next is AuthUnauthenticated && next.error != null) {
-        log("Authentication failed: ${next.error}");
+        log("Authentication error: ${next.error}");
       }
     });
 
-    final isLoading = authState is AuthLoading;
+    ref.listen<AsyncValue<void>>(authFlowNotifierProvider, (prev, next) {
+      next.whenOrNull(
+        data: (_) {
+          log("Login flow completed successfully.");
+          // Navigator.of(context).pushReplacementNamed('/home');
+        },
+        error: (err, _) {
+          log("Login flow failed: $err");
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text("Login failed: $err")));
+        },
+      );
+    });
+
+    final isLoading = loginState is AsyncLoading;
 
     return Scaffold(
       backgroundColor: const Color(0xFF0B1C2C),
@@ -72,7 +88,9 @@ class AuthLoginScreen extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(24),
                         ),
                       ),
-                      onPressed: isLoading ? null : () => notifier.login(),
+                      onPressed: isLoading
+                          ? null
+                          : () => loginNotifier.loginFlow(),
                       child: isLoading
                           ? const SizedBox(
                               width: 20,
@@ -86,7 +104,10 @@ class AuthLoginScreen extends ConsumerWidget {
                             )
                           : const Text(
                               'Entrar com GateWise',
-                              style: TextStyle(fontSize: 16),
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.white,
+                              ),
                             ),
                     ),
                   ),

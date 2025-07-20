@@ -5,7 +5,7 @@ import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:openid_client/openid_client_io.dart';
 import 'auth_config.dart';
 import 'auth_state.dart';
-import 'secure_storage.dart';
+import '../infra/secure_storage.dart';
 
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>(
   (ref) => AuthNotifier(),
@@ -43,6 +43,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
       final params = uri.queryParameters;
       final credential = await _flow.callback(params);
       final tokenResponse = await credential.getTokenResponse();
+
+      log(tokenResponse.accessToken ?? '');
 
       await SecureStore.saveTokens(
         accessToken: tokenResponse.accessToken!,
@@ -83,7 +85,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<void> logout() async {
-    await SecureStore.clear();
+    await SecureStore.clearAll();
     state = AuthUnauthenticated();
   }
 }
