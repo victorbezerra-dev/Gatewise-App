@@ -1,4 +1,4 @@
-package com.example.gatewise_app
+package com.gatewise.app
 
 import io.flutter.embedding.android.FlutterActivity
 
