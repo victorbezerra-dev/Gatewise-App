@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
 
 class SplashPage extends StatefulWidget {
@@ -32,7 +33,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
 
     Future.delayed(const Duration(seconds: 3), () {
       if (!mounted) return;
-      //TODO: Navigate with context.go('/login');
+      context.go('/auth-login');
     });
   }
 
@@ -49,7 +50,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
     final logoWidth = MediaQuery.of(context).size.width * 0.6;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0B1C2C),
+      backgroundColor: const Color.fromARGB(255, 20, 29, 38),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32),
