@@ -31,7 +31,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
 
     _dotAnimation = IntTween(begin: 0, end: 3).animate(_dotsController);
 
-    Future.delayed(const Duration(seconds: 3), () {
+    Future.delayed(const Duration(seconds: 4), () {
       if (!mounted) return;
       context.go('/auth-login');
     });
