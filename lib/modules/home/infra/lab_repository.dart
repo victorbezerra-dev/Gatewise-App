@@ -54,4 +54,25 @@ class LabRepository {
       throw Exception('Failed to fetch access grants: ${response.body}');
     }
   }
+
+  Future<void> requestAccess() async {
+    final accessToken = await SecureStore.accessToken;
+    if (accessToken == null) {
+      throw Exception('Access token not found');
+    }
+
+    final body = jsonEncode({
+      'labId': 1,
+      'reason': 'Student needs access to the laboratory',
+    });
+
+    final response = await httpClient.post(
+      '/api/AccessGrants/request-access',
+      body: body,
+    );
+
+    if (response.statusCode != 201) {
+      throw Exception('Failed to request access: ${response.body}');
+    }
+  }
 }
