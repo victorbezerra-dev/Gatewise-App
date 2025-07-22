@@ -2,9 +2,10 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gatewise_app/modules/authenticate/presentation/auth_flow_notifier.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/auth/auth_notifier.dart';
 import '../../../core/auth/auth_state.dart';
+import 'auth_flow_notifier.dart';
 
 class AuthLoginScreen extends ConsumerWidget {
   const AuthLoginScreen({super.key});
@@ -14,6 +15,7 @@ class AuthLoginScreen extends ConsumerWidget {
     final authState = ref.watch(authProvider);
     final loginState = ref.watch(authFlowNotifierProvider);
     final loginNotifier = ref.read(authFlowNotifierProvider.notifier);
+    final logoWidth = MediaQuery.of(context).size.width * 0.6;
 
     ref.listen<AuthState>(authProvider, (previous, next) {
       if (next is AuthAuthenticated) {
@@ -27,7 +29,7 @@ class AuthLoginScreen extends ConsumerWidget {
       next.whenOrNull(
         data: (_) {
           log("Login flow completed successfully.");
-          // Navigator.of(context).pushReplacementNamed('/home');
+          context.go('/main');
         },
         error: (err, _) {
           log("Login flow failed: $err");
@@ -51,64 +53,68 @@ class AuthLoginScreen extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.lock, color: Colors.white, size: 60),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'GateWise',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
+                  Transform.translate(
+                    offset: const Offset(0, -30),
+                    child: Image.asset(
+                      'assets/images/gatewise-logo.png',
+                      width: logoWidth,
+                      fit: BoxFit.contain,
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  if (authState is AuthUnauthenticated &&
-                      authState.error != null)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child: Text(
-                        'Erro: ${authState.error}',
-                        style: const TextStyle(color: Colors.redAccent),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  const Text(
-                    'Acesse sua conta com segurança.',
-                    style: TextStyle(color: Colors.white70, fontSize: 16),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 32),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 48,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF4D9EF6),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24),
+                  Transform.translate(
+                    offset: const Offset(0, -80),
+                    child: Column(
+                      children: [
+                        if (authState is AuthUnauthenticated &&
+                            authState.error != null)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: Text(
+                              'Erro: ${authState.error}',
+                              style: const TextStyle(color: Colors.redAccent),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        const Text(
+                          'Acesse sua conta com segurança.',
+                          style: TextStyle(color: Colors.white70, fontSize: 16),
+                          textAlign: TextAlign.center,
                         ),
-                      ),
-                      onPressed: isLoading
-                          ? null
-                          : () => loginNotifier.loginFlow(),
-                      child: isLoading
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  Colors.white,
-                                ),
-                              ),
-                            )
-                          : const Text(
-                              'Entrar com GateWise',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.white,
+                        const SizedBox(height: 32),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 60,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Color(0xFF4D9EF6),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
                               ),
                             ),
+                            onPressed: isLoading
+                                ? null
+                                : () => loginNotifier.loginFlow(),
+                            child: isLoading
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white,
+                                      ),
+                                    ),
+                                  )
+                                : const Text(
+                                    'Entrar com GateWise',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
