@@ -35,6 +35,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   ({Color color, String text, VoidCallback? onPressed}) getButtonProps(
     AccessStatusUi status,
     HomeNotifier notifier,
+    HomeState state,
   ) {
     switch (status) {
       case AccessStatusUi.granted:
@@ -44,9 +45,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           onPressed: () => notifier.openLab(),
         );
       case AccessStatusUi.pendingRequest:
-        return (color: Colors.blue, text: 'Solicitar acesso', onPressed: () {});
+        return (
+          color: Colors.blue,
+          text: 'Solicitar acesso',
+          onPressed: state.requestAccessStatus.isLoading
+              ? null
+              : () => notifier.requestAccess(),
+        );
       case AccessStatusUi.rejected:
-        return (color: Colors.grey, text: 'Solicitar acesso', onPressed: null);
+        return (
+          color: Colors.grey,
+          text: 'Solicitação de Acesso Rejeitada',
+          onPressed: null,
+        );
       case AccessStatusUi.pending:
         return (
           color: Colors.grey,
@@ -62,9 +73,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final notifier = ref.read(homeNotifierProvider.notifier);
     final logoWidth = MediaQuery.of(context).size.width * 0.38;
 
-    final buttonProps = getButtonProps(state.accessStatus, notifier);
+    final buttonProps = getButtonProps(state.accessStatus, notifier, state);
 
     Widget buildMainButton() {
+      final isLoading =
+          state.accessStatus == AccessStatusUi.pendingRequest &&
+          state.requestAccessStatus.isLoading;
       return ElevatedButton(
         onPressed: buttonProps.onPressed,
         style: ElevatedButton.styleFrom(
@@ -76,11 +90,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
         child: SizedBox(
           width: double.infinity,
-          child: Text(
-            buttonProps.text,
-            style: const TextStyle(color: Colors.white),
-            textAlign: TextAlign.center,
-          ),
+          child: isLoading
+              ? Center(
+                  child: const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      strokeWidth: 2.3,
+                    ),
+                  ),
+                )
+              : Text(
+                  buttonProps.text,
+                  style: const TextStyle(color: Colors.white),
+                  textAlign: TextAlign.center,
+                ),
         ),
       );
     }
@@ -111,9 +136,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
                 TextSpan(
                   text: getStatusText(state.accessStatus),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
-                    color: Colors.white70,
+                    color: state.accessStatus == AccessStatusUi.rejected
+                        ? Colors.red
+                        : Colors.white70,
                     fontWeight: FontWeight.normal,
                   ),
                 ),
@@ -157,7 +184,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             child: Transform.translate(
               offset: const Offset(0, -40),
               child: RefreshIndicator(
-                onRefresh: () async => notifier.fetchAccessGrants(),
+                onRefresh: () async => await notifier.fetchAccessGrants(),
                 child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   child: buildContent(),

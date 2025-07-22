@@ -11,16 +11,23 @@ enum AccessStatusUi { pendingRequest, pending, granted, rejected }
 class HomeState {
   final AccessStatusUi accessStatus;
   final AsyncValue<void> openLabStatus;
+  final AsyncValue<void> requestAccessStatus;
 
-  HomeState({required this.accessStatus, required this.openLabStatus});
+  HomeState({
+    required this.accessStatus,
+    required this.openLabStatus,
+    required this.requestAccessStatus,
+  });
 
   HomeState copyWith({
     AccessStatusUi? accessStatus,
     AsyncValue<void>? openLabStatus,
+    AsyncValue<void>? requestAccessStatus,
   }) {
     return HomeState(
       accessStatus: accessStatus ?? this.accessStatus,
       openLabStatus: openLabStatus ?? this.openLabStatus,
+      requestAccessStatus: requestAccessStatus ?? this.requestAccessStatus,
     );
   }
 }
@@ -44,6 +51,7 @@ class HomeNotifier extends StateNotifier<HomeState> {
         HomeState(
           accessStatus: AccessStatusUi.pendingRequest,
           openLabStatus: const AsyncData(null),
+          requestAccessStatus: const AsyncData(null),
         ),
       );
 
@@ -69,6 +77,18 @@ class HomeNotifier extends StateNotifier<HomeState> {
       }
       state = state.copyWith(accessStatus: status);
     } catch (_) {
+      state = state.copyWith(accessStatus: AccessStatusUi.pendingRequest);
+    }
+  }
+
+  Future<void> requestAccess() async {
+    try {
+      state = state.copyWith(requestAccessStatus: const AsyncLoading());
+      await Future.delayed(Duration(seconds: 1));
+      await _repository.requestAccess();
+      state = state.copyWith(requestAccessStatus: const AsyncData(null));
+      state = state.copyWith(accessStatus: AccessStatusUi.pending);
+    } catch (e) {
       state = state.copyWith(accessStatus: AccessStatusUi.pendingRequest);
     }
   }
