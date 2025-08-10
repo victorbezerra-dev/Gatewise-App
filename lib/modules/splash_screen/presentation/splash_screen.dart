@@ -47,8 +47,6 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final logoWidth = MediaQuery.of(context).size.width * 0.6;
-
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 20, 29, 38),
       body: SafeArea(
@@ -80,12 +78,12 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                       offset: const Offset(0, -30),
                       child: Image.asset(
                         'assets/images/gatewise-logo.png',
-                        width: logoWidth,
+                        width: 200,
                         fit: BoxFit.contain,
                       ),
                     ),
                     Transform.translate(
-                      offset: const Offset(0, -120),
+                      offset: const Offset(0, -90),
                       child: const Text.rich(
                         TextSpan(
                           text: 'Mais que acesso. ',
